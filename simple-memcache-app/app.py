@@ -20,7 +20,7 @@ def serve_key_request(key: str):
         if value:
             return jsonify({key: value.decode()})
         else:
-            abort(404, description="Key not found.")
+            abort(404, description='Key not found.')
     if request.method == 'POST':
         value = request.form.get('value')
         memcache_client.set(key, value, expire=60)
