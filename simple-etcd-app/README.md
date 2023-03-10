@@ -17,7 +17,7 @@ The lock is implemented as a key in [etcd v3.4](https://etcd.io/docs/v3.4/) usin
 
   1. Build App image.
   ```
-  export APP_NAME=myapp
+  export APP_NAME=my-app
   export APP_VERSION=1.0
   docker build -t $APP_NAME:$APP_VERSION .
   ```
@@ -51,7 +51,15 @@ The lock is implemented as a key in [etcd v3.4](https://etcd.io/docs/v3.4/) usin
   export ETCD_PORT=2379
   export ETCD_LOCK_KEY=/my/lock
   export ETCD_LOCK_TTL=60
-  docker run --rm -p $HTTP_PORT:$HTTP_PORT -e HTTP_PORT=$HTTP_PORT -e ETCD_HOST=$ETCD_HOST -e ETCD_PORT=$ETCD_PORT -e ETCD_LOCK_KEY=$ETCD_LOCK_KEY -e ETCD_LOCK_TTL=$ETCD_LOCK_TTL $APP_NAME:$APP_VERSION
+  docker run --rm \
+  --name $APP_NAME \
+  -p $HTTP_PORT:$HTTP_PORT \
+  -e HTTP_PORT=$HTTP_PORT \
+  -e ETCD_HOST=$ETCD_HOST \
+  -e ETCD_PORT=$ETCD_PORT \
+  -e ETCD_LOCK_KEY=$ETCD_LOCK_KEY \
+  -e ETCD_LOCK_TTL=$ETCD_LOCK_TTL \
+  $APP_NAME:$APP_VERSION
   ```
 
   5. The endpoints of these app are:
