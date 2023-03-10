@@ -50,13 +50,13 @@ def increase_counter():
         # Release lock (happen only if acquired)
         released = etcd_lock.release()
         print(f'release for sleep({sleep_t}): {released}', file=sys.stderr)
-    return jsonify({"counter": counter})
+    return jsonify({'counter': counter})
 
 
 @app.route('/read_counter', methods=['GET'])
 def read_counter():
     # Request to return the current counter value
-    return jsonify({"counter": counter})
+    return jsonify({'counter': counter})
 
 
 if __name__ == '__main__':
