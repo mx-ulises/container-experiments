@@ -4,9 +4,6 @@ FROM golang:latest AS builder
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the Go module files
-COPY go.mod ./
-
 # Copy the application source code
 COPY . .
 
