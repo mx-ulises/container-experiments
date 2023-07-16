@@ -1,0 +1,22 @@
+version: '3'
+services:
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - "./prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "./rules.yml:/etc/prometheus/rules.yml"
+    networks:
+      - localprom
+    ports:
+      - 9090:9090
+  golang-app:
+    build: .
+    ports:
+      - 8080:8080
+    environment:
+      - PORT=8080
+    networks:
+      - localprom
+networks:
+  localprom:
+    driver: bridge
