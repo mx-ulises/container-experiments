@@ -1,6 +1,10 @@
 # Use the official Golang base image
 FROM golang:latest AS builder
 
+# Download dependencies
+RUN go get github.com/prometheus/client_golang/prometheus
+RUN go get github.com/prometheus/client_golang/prometheus/promhttp
+
 # Set the working directory inside the container
 WORKDIR /app
 
@@ -8,8 +12,6 @@ WORKDIR /app
 COPY . .
 
 # Build the Go application
-RUN go get github.com/prometheus/client_golang/prometheus
-RUN go get github.com/prometheus/client_golang/prometheus/promhttp
 RUN go build -o main -ldflags '-linkmode external -w -extldflags "-static"'
 
 # Bundle Stage
