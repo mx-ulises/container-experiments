@@ -60,6 +60,21 @@ var (
 			Help: "Current balance of coins in this app (Saved - Spent)",
 		},
 	)
+
+	averageLatency = prometheus.NewSummary(
+		prometheus.SummaryOpts{
+			Name: "puar_golang_latency_seconds",
+			Help: "Average latency in seconds",
+		},
+	)
+
+	percentileLatency = prometheus.NewHistogram(
+		prometheus.HistogramOpts{
+			Name:    "puar_golang_latency_percentiles_seconds",
+			Help:    "Percentile latency in seconds",
+			Buckets: prometheus.DefBuckets, // Default linear buckets
+		},
+	)
 )
 
 func init() {
@@ -70,25 +85,29 @@ func init() {
 	prometheus.MustRegister(spendRequestErrorCount)
 	prometheus.MustRegister(spentCoinCount)
 	prometheus.MustRegister(coinBalance)
+	prometheus.MustRegister(averageLatency)
+	prometheus.MustRegister(percentileLatency)
 }
 
 func generalHandler(
-	requestCount prometheus.Counter,
-	requestErrorCount prometheus.Counter,
-	coinCount prometheus.Counter,
+	requestCount *prometheus.Counter,
+	requestErrorCount *prometheus.Counter,
+	coinCount *prometheus.Counter,
 	operation string,
-	w http.ResponseWriter,
+	w *http.ResponseWriter,
 	r *http.Request,
 	sign float64,
 ) {
+	// Get start time
+	startTime := time.Now()
 	// Increase request count
-	requestCount.Inc()
+	(*requestCount).Inc()
 
 	// Exception Handler
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Fprint(w, "Request Error: ", err)
-			requestErrorCount.Inc()
+			fmt.Fprint(*w, "Request Error: ", err)
+			(*requestErrorCount).Inc()
 		}
 	}()
 
@@ -114,20 +133,28 @@ func generalHandler(
 		panic("Random Error")
 	}
 
+	// Generate random sleep
+	duration := time.Duration(1000*randomNumber) * time.Millisecond
+	time.Sleep(duration)
+
 	// Increase number of coins
-	coinCount.Add(coins)
+	(*coinCount).Add(coins)
 	coinBalance.Add(coins * sign)
 
 	// Successful request
-	fmt.Fprint(w, "Successful ", operation, " Request, coins: ", coins)
+	fmt.Fprint(*w, "Successful ", operation, " Request, coins: ", coins)
+	endTime := time.Now()
+	diff := float64(endTime.Sub(startTime).Seconds())
+	averageLatency.Observe(diff)
+	percentileLatency.Observe(diff)
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request) {
-	generalHandler(saveRequestCount, saveRequestErrorCount, savedCoinCount, "Save", w, r, 1)
+	generalHandler(&saveRequestCount, &saveRequestErrorCount, &savedCoinCount, "Save", &w, r, 1)
 }
 
 func spendHandler(w http.ResponseWriter, r *http.Request) {
-	generalHandler(spendRequestCount, spendRequestErrorCount, spentCoinCount, "Spend", w, r, -1)
+	generalHandler(&spendRequestCount, &spendRequestErrorCount, &spentCoinCount, "Spend", &w, r, -1)
 }
 
 func main() {

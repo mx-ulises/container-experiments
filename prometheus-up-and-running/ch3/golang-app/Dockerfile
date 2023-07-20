@@ -1,12 +1,15 @@
 # Use the official Golang base image
 FROM golang:latest AS builder
 
-# Download dependencies
-RUN go get github.com/prometheus/client_golang/prometheus
-RUN go get github.com/prometheus/client_golang/prometheus/promhttp
-
 # Set the working directory inside the container
 WORKDIR /app
+
+# Copy information about the used go modules
+COPY go.mod .
+COPY go.sum .
+
+# Only download updates if modules files have changed
+RUN go mod download
 
 # Copy the application source code
 COPY . .

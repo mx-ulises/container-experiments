@@ -4,17 +4,20 @@ services:
     image: prom/prometheus
     volumes:
       - "./prometheus.yml:/etc/prometheus/prometheus.yml"
-      - "./rules.yml:/etc/prometheus/rules.yml"
     networks:
       - localprom
     ports:
       - 9090:9090
   golang-app:
-    build: .
+    build: ./golang-app
     ports:
       - 8080:8080
     environment:
       - PORT=8080
+    networks:
+      - localprom
+  python-request-generator:
+    build: ./python-request-generator
     networks:
       - localprom
 networks:
