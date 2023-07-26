@@ -18,6 +18,14 @@ services:
     build: ./golang-job
     networks:
       - localprom
+  python-flask-prometheus-parser-app:
+    build: ./python-flask-prometheus-parser
+    ports:
+      - 8080:8080
+    environment:
+      - PORT=8080
+    networks:
+      - localprom
 networks:
   localprom:
     driver: bridge
