@@ -1,7 +1,7 @@
 import os
 import requests
 
-from flask import Flask
+from flask import Flask, make_response
 from prometheus_client.parser import text_string_to_metric_families
 
 app = Flask(__name__)
@@ -25,7 +25,11 @@ def home():
     for family in text_string_to_metric_families(get_request_text(PUSHGATEWAY_URL)):
         for sample in family.samples:
           output.append("Name: {0} Labels: {1} Value: {2}".format(*sample))
-    return "Metrics Families:\n" + "\n".join(output)
+    content = "Metrics Families:\n" + "\n".join(output)
+    response = make_response(content)
+    response.headers["Content-Type"] = "text/plain"
+    return response
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
